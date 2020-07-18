@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:mock="http://www.mulesoft.org/schema/mule/mock" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:core="http://www.mulesoft.org/schema/mule/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/mock http://www.mulesoft.org/schema/mule/mock/current/mule-mock.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <munit:config name="munit" doc:name="MUnit configuration"/>
+    <spring:beans>
+        <spring:import resource="classpath:uber_customer_tech.xml"/>
+    </spring:beans>
+    <munit:test name="uber_customer_tech-test-suite-Get_uber_customer_techFlowTest" description="Test">
+		<mock:when messageProcessor=".*:.*" doc:name="Mock">
+			<mock:with-attributes>
+				<mock:with-attribute name="doc:name" whereValue="#['get by city data']"/>
+			</mock:with-attributes>
+			<mock:then-return payload="#[]"/>
+		</mock:when>
+        <flow-ref name="Get_uber_customer_techFlow" doc:name="Flow-ref to Get_uber_customer_techFlow"/>
+		<munit:assert-null doc:name="Assert Null Payload"/>
+    </munit:test>
+    <munit:test name="uber_customer_tech-test-suite-post_uber_customer_techFlowTest" description="Test">
+        <flow-ref name="post_uber_customer_techFlow" doc:name="Flow-ref to post_uber_customer_techFlow"/>
+    </munit:test>
+    <munit:test name="uber_customer_tech-test-suite-delete_uber_customer_techFlowTest" description="Test">
+        <flow-ref name="delete_uber_customer_techFlow" doc:name="Flow-ref to delete_uber_customer_techFlow"/>
+    </munit:test>
+</mule>

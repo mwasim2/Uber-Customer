@@ -1,0 +1,41 @@
+#%RAML 1.0 Trait
+responses:
+
+    400:
+      body:
+        application/json:
+          example:
+            message: Bad Request! please provide correct data.
+    401:
+      body:
+        application/json:
+          example:
+            message: Unaouthrized, please provide Valid cridentials!
+    402:
+      body:
+        application/json:
+          example:
+            message: Make a payment first!
+    403:
+      body:
+        application/json:
+          example:
+            message: you don't have an access! 
+    404:
+      body:
+        application/json:
+          example:
+            mesage: Not Found
+    405:
+      body:
+        application/json:
+          example:
+            message: Method Not Allowed
+    500:
+      body:
+        application/json:
+          example:
+            message: The request was not completed the server met an Unexpeected Condition
+    
+
+       

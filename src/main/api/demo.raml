@@ -1,0 +1,72 @@
+#%RAML 1.0
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/69bd7ecd-b585-4cea-a966-e218eaea6099/ # 
+title: ATG_Customer_Information
+description: ATG Employee Details Specification 
+types:
+  DataType: !include Data/dataType.raml
+traits:
+  Error: !include Traits/error_trait.raml
+  client-id-required: !include Traits/client_ID_Secret.raml    
+/ATG:
+  is: [client-id-required,Error]
+  description: We haveing one Resoruce i.e- ATG
+  get:
+    queryParameters:
+      city?:
+        type: string
+        enum:
+          - Hyderabad
+          - Jamshedpur
+          - Kolkata
+          - Delhi
+          - Mumbai
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include Example/examples.raml
+    
+  post:
+    body:
+      application/json:
+        type: DataType
+        example: !include Example/withoutID_example.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example: !include Example/example.raml
+    
+  /{getByID}:
+    is: [client-id-required,Error]
+    get:
+        queryParameters:
+          CUST_ID?:
+            type: number
+        responses:
+          200:
+            body:
+              application/json:
+                type: DataType
+                example: !include Example/example.raml
+        
+      
+    delete:
+      responses:
+        200:
+          body:
+            application/json:
+              type: DataType
+              example:
+                Message: Data Deleted really!
+          
+                
+          
+              
+                
+              
+
+        
+              
+        
+              

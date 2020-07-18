@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:context="http://www.springframework.org/schema/context" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd">
+	<http:listener-config name="HTTP_Listener_Configuration" host="${http.host}" port="${http.port}" doc:name="HTTP Listener Configuration"/>
+	<db:mysql-config name="MySQL_Configuration" host="${db.host}" port="${db.port}" user="${db.user}" password="${db.password}" database="${db.database}" doc:name="MySQL Configuration"/>
+	<context:property-placeholder location="mule-${env}.properties"/>
+	<flow name="Get_uber_customer_techFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="${http.path}" allowedMethods="GET" doc:name="GET_REQUEST"/>
+		<set-variable variableName="getvalue" value="#[message.inboundProperties.'http.query.params'.getvalue]" doc:name="Get City Value"/>
+		<choice doc:name="Choice">
+			<when expression="#[flowVars.getvalue !=null]">
+				<db:select config-ref="MySQL_Configuration" doc:name="get by city data">
+					<db:parameterized-query><![CDATA[select *from Customer where cust_city= #[message.inboundProperties.'http.query.params'.getvalue]]]></db:parameterized-query>
+				</db:select>
+			</when>
+			<otherwise>
+				<db:select config-ref="MySQL_Configuration" doc:name="get all data">
+					<db:parameterized-query><![CDATA[select *from Customer]]></db:parameterized-query>
+				</db:select>
+			</otherwise>
+		</choice>
+		<json:object-to-json-transformer doc:name="Data Transafer OBJECT to JSON"/>
+	</flow>
+	<flow name="post_uber_customer_techFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="${http.path}" allowedMethods="POST" doc:name="POST REQUEST"/>
+		<json:json-to-object-transformer doc:name="JSON to Object"/>
+		<dw:transform-message doc:name="Transform Message">
+			<dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+		</dw:transform-message>
+		<foreach doc:name="For Each">
+			<db:insert config-ref="MySQL_Configuration" doc:name="Database">
+				<db:parameterized-query><![CDATA[insert into Customer values (#[payload.cust_id], #[payload.cust_first_name], #[payload.cust_last_name], #[payload.cust_gender], #[payload.cust_year_of_birth], #[payload.cust_marital_status], #[payload.cust_street_address], #[payload.cust_postal_code], #[payload.cust_city], #[payload.cust_comment])]]></db:parameterized-query>
+			</db:insert>
+		</foreach>
+		<set-payload value="Data Inserted" doc:name="Set Payload"/>
+	</flow>
+	<flow name="delete_uber_customer_techFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/uber/{id}" allowedMethods="DELETE" doc:name="DELETE_REQUEST"/>
+		<db:delete config-ref="MySQL_Configuration" doc:name="Data Deleted from Database">
+			<db:parameterized-query><![CDATA[delete from Customer where cust_id= #[message.inboundProperties.'http.uri.params'.id]]]></db:parameterized-query>
+		</db:delete>
+		<set-payload value="Data Deleted." doc:name="Complete Message"/>
+	</flow>
+</mule>
